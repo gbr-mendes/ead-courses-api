@@ -139,6 +139,8 @@ class PrivateUserApiTests(TestCase):
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
         type_user = UserType.objects.create(name='Test Case User Type')
+        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
+        self.user.groups.add(allowed_group.id)
         self.payload = {
             'email': 'test@email.com',
             'password': 'TestCasePassWord',
@@ -155,9 +157,6 @@ class PrivateUserApiTests(TestCase):
 
     def test_create_user_success(self):
         """Test creating a user with sucessful"""
-        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
-        self.user.groups.add(allowed_group.id)
-
         res = self.client.post(CREATE_USER_URL, self.payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
@@ -168,8 +167,6 @@ class PrivateUserApiTests(TestCase):
     def test_create_user_with_credentials_already_registered(self):
         """Test creating a user with an email already registered"""
         create_user(email='test@email.com', password='TestCasePassWord')
-        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
-        self.user.groups.add(allowed_group.id)
         res = self.client.post(CREATE_USER_URL, self.payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -178,10 +175,7 @@ class PrivateUserApiTests(TestCase):
         Test that a user is not created with a password
         less than 7 characters
         """
-
         self.payload['password'] = 'abc'
-        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
-        self.user.groups.add(allowed_group.id)
 
         res = self.client.post(CREATE_USER_URL, self.payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
@@ -221,16 +215,14 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_create_user_invalid_cpf(self):
-        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
-        self.user.groups.add(allowed_group.id)
+        """Test creating a user with an invalid cpf"""
         self.payload['cpf'] = 'invalid'
         res = self.client.post(CREATE_USER_URL, self.payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_user_invalid_phone(self):
-        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
-        self.user.groups.add(allowed_group.id)
+        """Test creating a user with an invalid phone mask"""
         self.payload['phone'] = 'invalid'
         res = self.client.post(CREATE_USER_URL, self.payload)
 
