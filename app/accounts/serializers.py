@@ -3,6 +3,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
 
+from .utils import Util
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializers for the user object"""
@@ -34,6 +36,16 @@ class UserSerializer(serializers.ModelSerializer):
             user.save()
 
         return user
+
+    def validate_cpf(self, cpf):
+        if not Util.validate_cpf(cpf):
+            raise serializers.ValidationError('Type a valid CPF')
+        return cpf
+
+    def validate_phone(self, phone):
+        if not Util.validate_phone(phone):
+            raise serializers.ValidationError('Type a valid Phone Number')
+        return phone
 
 
 class AuthTokenSerializer(serializers.Serializer):

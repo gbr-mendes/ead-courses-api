@@ -145,7 +145,7 @@ class PrivateUserApiTests(TestCase):
             'name': 'Test Case',
             'type': type_user.id,
             'cpf': '204.782.150-96',
-            'phone': '19999999999',
+            'phone': '19 99999-9999',
             'zip_code': '74603-110',
             'street': 'Rua 218',
             'city': 'Goiânia',
@@ -219,3 +219,19 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+    def test_create_user_invalid_cpf(self):
+        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
+        self.user.groups.add(allowed_group.id)
+        self.payload['cpf'] = 'invalid'
+        res = self.client.post(CREATE_USER_URL, self.payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_user_invalid_phone(self):
+        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
+        self.user.groups.add(allowed_group.id)
+        self.payload['phone'] = 'invalid'
+        res = self.client.post(CREATE_USER_URL, self.payload)
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
