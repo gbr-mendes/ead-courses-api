@@ -1,15 +1,18 @@
 from rest_framework import generics, authentication, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
+from rest_framework import mixins
 
-from .serializers import UserSerializer, AuthTokenSerializer
+from . import models
+from .serializers import EmployeeSerializer, AuthTokenSerializer, UserSerializer
 from .permissions import SchoolAdministrators
 
 
-class CreateUserAPIView(generics.CreateAPIView):
+class CreateEmployeeAPIView(generics.ListCreateAPIView):
     """Create a new User in the system"""
-    serializer_class = UserSerializer
+    serializer_class = EmployeeSerializer
     permission_classes = (SchoolAdministrators,)
+    queryset = models.Employe.objects.all()
 
 
 class CreateTokenView(ObtainAuthToken):

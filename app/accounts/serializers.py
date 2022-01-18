@@ -3,6 +3,8 @@ from django.utils.translation import ugettext_lazy as _
 
 from rest_framework import serializers
 
+from accounts import models
+
 from .utils import Util
 
 
@@ -10,18 +12,9 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializers for the user object"""
     class Meta:
         model = get_user_model()
-        fields = ('email',
-                  'password',
-                  'name',
-                  'type',
-                  'cpf',
-                  'phone',
-                  'street',
-                  'state',
-                  'city',
-                  'zip_code',
-                  'complement')
-        extra_kwargs = {'password': {'write_only': True, 'min_length': 7}}
+        fields = '__all__'
+        extra_kwargs = {'password': {'write_only': True, 'min_length': 7}, 
+                        'id':{'read_only':True}}
 
     def create(self, validated_data):
         return get_user_model().objects.create_user(**validated_data)
@@ -46,6 +39,21 @@ class UserSerializer(serializers.ModelSerializer):
         if not Util.validate_phone(phone):
             raise serializers.ValidationError('Type a valid Phone Number')
         return phone
+
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    job = serializers.PrimaryKeyRelatedField(queryset=models.Job.objects.all())
+    user = UserSerializer()
+    class Meta:
+        model = models.Employe
+        fields = ('id','user','hired_date', 'salary', 'job')
+        extra_kwargs = {'id': {'read_only': True}}
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = get_user_model().objects.create_user(**user_data)
+        employee = models.Employe.objects.create(**validated_data, user=user)
+        return employee
 
 
 class AuthTokenSerializer(serializers.Serializer):

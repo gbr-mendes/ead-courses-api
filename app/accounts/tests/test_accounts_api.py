@@ -1,14 +1,16 @@
+import uuid
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.contrib.auth.models import Group
+from django.utils import timezone, dateformat
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from accounts.models import UserType
+from accounts import models, serializers
 
-CREATE_USER_URL = reverse('accounts:create')
+CREATE_EMPLOYEE_URL = reverse('accounts:create_employee')
 GENERATE_TOKEN_USER = reverse('accounts:token')
 ME_URL = reverse('accounts:me')
 
@@ -16,45 +18,54 @@ ME_URL = reverse('accounts:me')
 def create_user(**params):
     return get_user_model().objects.create_user(**params)
 
+def create_employee(**params):
+    return models.Employe.objects.create(**params)
 
-class PublicRoutesAccountsApiTest(TestCase):
-    """Tests for an unauthenticated requests"""
+def create_allowed_groups(groups):
+    for group in groups:
+        Group.objects.create(name=group)
+
+def add_user_allowed_group(user, allowed_groups):
+    allowed = False
+    user_groups = user.groups.all()
+    for group in user_groups:
+        if group.name in allowed_groups:
+            return
+    if not allowed:
+        user.groups.add(Group.objects.get(name=allowed_groups[0]))
+
+
+
+
+class PublicUserApiTests(TestCase):
+    """Test for unauthenticated requests"""
     def setUp(self):
         self.client = APIClient()
-        type_user = UserType.objects.create(name='Test Case User Type')
-        self.payload = {
-            'email': 'test@email.com',
-            'password': 'TestCasePassWord',
+        self.user_payload = {
             'name': 'Test Case',
-            'type': type_user,
-            'cpf': '204.782.150-96',
-            'phone': '19999999999',
-            'zip_code': '74603-110',
-            'street': 'Rua 218',
-            'city': 'Goiânia',
-            'state': 'GO',
-            'complement': '',
+            'email': 'test@email.com',
+            'password': 'password',
+            'cpf': '516.040.900-90',
+            'phone': '19 99999-9999',
+            'street': 'Rua Antonia Maria das Neves Carvalhos',
+            'state': 'PE',
+            'city': 'Caruaru',
+            'zip_code': '55019-325',
+        }
+    
+    def test_create_employee_fail(self):
+        """Test that authentication is required to create a employee"""
+        employee_payload = {
+            'user': self.user_payload,
+            'hired_date': dateformat.format(timezone.now(), 'Y-m-d'),
+            'salary': '1200.00',
+            'job': models.Job.objects.create(name='Test Job').id
         }
 
-    def test_create_user_unauthenticated(self):
-        """Test creating an account with unauthenticated user"""
-        res = self.client.post(CREATE_USER_URL, self.payload)
+        res = self.client.post(CREATE_EMPLOYEE_URL, employee_payload, format='json')
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_create_account_not_allowed_role(self):
-        """
-        Test creating an account with an authenticated user that
-        is not on allowed groups
-        """
-        user = get_user_model().objects.create_user(
-            email='teste@testecase.com',
-            password='testecase1234'
-        )
-        self.client.force_authenticate(user=user)
-
-        res = self.client.post(CREATE_USER_URL, self.payload)
-
-        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
+        exists = models.Employe.objects.filter(user__email=self.user_payload['email']).exists()
+        self.assertFalse(exists)
 
     def test_create_token_for_user(self):
         """Test creating a token successful for a valid user"""
@@ -75,10 +86,9 @@ class PublicRoutesAccountsApiTest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_create_token_invalid_creadentials(self):
-        """Test that a toke IS NOT generated with an invalid password"""
+        """Test that a token IS NOT generated with an invalid password"""
         payload = {
                     'email': 'test@gbmsolucoesweb.com',
-                    'name': 'Test Case',
                     'password': 'testCase123'
                     }
         create_user(**payload)
@@ -120,88 +130,84 @@ class PublicRoutesAccountsApiTest(TestCase):
 
     def test_retrive_user_unauthorized(self):
         """
-        Test that authentication is reqquiired for retrive data of user
+        Test that authentication is required for retrive data of user
         """
         res = self.client.get(ME_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class PrivateUserApiTests(TestCase):
-    """
-    Test requests that require authentication
-    """
+    """Test requests that require authentication"""
     def setUp(self):
-        payload = {
-                'name': 'Test Case',
-                'email': 'testcase@gbmsolucoesweb.com',
-                'password': 'testCase'}
-        self.user = create_user(**payload)
+        self.user = create_user(
+            name='Test Name',
+            email='authtest@user.com',
+            password='password'
+        )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
-        type_user = UserType.objects.create(name='Test Case User Type')
-        allowed_group = Group.objects.get_or_create(name='School Admin')[0]
-        self.user.groups.add(allowed_group.id)
-        self.payload = {
-            'email': 'test@email.com',
-            'password': 'TestCasePassWord',
+
+        allowed_groups_list = ('School Admin',)
+        create_allowed_groups(allowed_groups_list)
+        add_user_allowed_group(self.user, allowed_groups_list)
+
+        self.user_payload = {
             'name': 'Test Case',
-            'type': type_user.id,
-            'cpf': '204.782.150-96',
+            'email': 'test@email.com',
+            'password': 'password',
+            'cpf': '516.040.900-90',
             'phone': '19 99999-9999',
-            'zip_code': '74603-110',
-            'street': 'Rua 218',
-            'city': 'Goiânia',
-            'state': 'GO',
-            'complement': '',
+            'street': 'Rua Antonia Maria das Neves Carvalhos',
+            'state': 'PE',
+            'city': 'Caruaru',
+            'zip_code': '55019-325',
         }
-
-    def test_create_user_success(self):
-        """Test creating a user with sucessful"""
-        res = self.client.post(CREATE_USER_URL, self.payload)
-
+        self.employee_payload = {
+            'user': self.user_payload,
+            'hired_date': dateformat.format(timezone.now(), 'Y-m-d'),
+            'salary': '1200.00',
+            'job': models.Job.objects.create(name='Test Job').id
+        }
+    def test_create_employee_success(self):
+        """Test creating an employee successfuly"""
+        
+        res = self.client.post(CREATE_EMPLOYEE_URL,self.employee_payload, format='json')
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(
-            get_user_model().objects.filter(**res.data).exists()
-        )
-
+        exists = models.Employe.objects.filter(user__email=self.user_payload['email']).exists()
+        self.assertTrue(exists)
+    
     def test_create_user_with_credentials_already_registered(self):
-        """Test creating a user with an email already registered"""
-        create_user(email='test@email.com', password='TestCasePassWord')
-        res = self.client.post(CREATE_USER_URL, self.payload)
+        """Test creating an employee with an email already registered"""
+        create_user(**self.user_payload)
+        res = self.client.post(CREATE_EMPLOYEE_URL, self.employee_payload, format='json')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
+    
     def test_password_is_too_short(self):
-        """
-        Test that a user is not created with a password
-        less than 7 characters
-        """
-        self.payload['password'] = 'abc'
-
-        res = self.client.post(CREATE_USER_URL, self.payload)
+        """Test creating an employee short password"""
+        self.user_payload['password'] = 'short'
+        res = self.client.post(CREATE_EMPLOYEE_URL, self.employee_payload, format='json')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
         user_exists = get_user_model().objects\
-            .filter(email=self.payload['email']).exists()
+            .filter(email=self.user_payload['email']).exists()
         self.assertFalse(user_exists)
-
+    
     def test_retrive_profile_success(self):
         """
-        Test retrive logged in user successul
+        Test retrive logged in user successuly
         """
         res = self.client.get(ME_URL)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(self.user.name, res.data['name'])
         self.assertEqual(self.user.email, res.data['email'])
-
+    
     def test_post_me_not_allowed(self):
-        """
-        Test that posts requests are not allowed for the profile
-        """
+        """Test that posts requests are not allowed for the profile"""
         res = self.client.post(ME_URL, {})
 
         self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
-
+    
     def test_update_profile_success(self):
         """
         Test that the user profile was updated
@@ -213,17 +219,4 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(self.user.name, payload['name'])
         self.assertTrue(self.user.check_password(payload['password']))
         self.assertEqual(res.status_code, status.HTTP_200_OK)
-
-    def test_create_user_invalid_cpf(self):
-        """Test creating a user with an invalid cpf"""
-        self.payload['cpf'] = 'invalid'
-        res = self.client.post(CREATE_USER_URL, self.payload)
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_create_user_invalid_phone(self):
-        """Test creating a user with an invalid phone mask"""
-        self.payload['phone'] = 'invalid'
-        res = self.client.post(CREATE_USER_URL, self.payload)
-
-        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+        

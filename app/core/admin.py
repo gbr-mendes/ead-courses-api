@@ -11,7 +11,6 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         (_('Personal Info'), {'fields': ('name', 'cpf', 'phone')}),
-        (_('Type User'), {'fields': ('type',)}),
         (_('Address Info'), {'fields': ('street',
                                         'state',
                                         'city',
@@ -34,4 +33,5 @@ class UserAdmin(BaseUserAdmin):
 
 
 admin.site.register(models.User, UserAdmin)
-admin.site.register(models.UserType)
+admin.site.register(models.Job)
+admin.site.register(models.Employe)
