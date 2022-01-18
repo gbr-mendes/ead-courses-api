@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # Local Apps
     'core.apps.CoreConfig',
     'accounts.apps.AccountsConfig',
+    'university.apps.UniversityConfig',
 ]
 
 MIDDLEWARE = [

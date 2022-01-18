@@ -3,11 +3,10 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, \
                                                         PermissionsMixin
-from django.conf import settings
-from django.utils.timezone import now
+
 
 class UserManager(BaseUserManager):
-
+    """Manage for custom user"""
     def create_user(self, email, password=None, **extra_fields):
         """Creates and saves a new user"""
         if not email:
@@ -57,22 +56,3 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
     USERNAME_FIELD = 'email'
-
-
-class Job(models.Model):
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
-
-class Employe(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    hired_date = models.DateField(default=now)
-    salary = models.DecimalField(max_digits=10, decimal_places=2)
-    job = models.ForeignKey(Job, on_delete=models.PROTECT)
-    
-
-    def __str__(self):
-        return self.user.name

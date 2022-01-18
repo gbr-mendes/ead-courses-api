@@ -3,6 +3,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext as _
 
 from accounts import models
+from university import models as university_models
 
 
 class UserAdmin(BaseUserAdmin):
@@ -33,5 +34,5 @@ class UserAdmin(BaseUserAdmin):
 
 
 admin.site.register(models.User, UserAdmin)
-admin.site.register(models.Job)
-admin.site.register(models.Employe)
+admin.site.register(university_models.Employee)
+admin.site.register(university_models.Job)
