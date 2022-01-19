@@ -16,4 +16,9 @@ urlpatterns = [
             views.CreateTeacherAPIView.as_view()           ,
             name='create_teacher'
         ),
+    path(
+            'course/',
+            views.CreateCourseAPIView.as_view(),
+            name='create_course'
+        )
 ]

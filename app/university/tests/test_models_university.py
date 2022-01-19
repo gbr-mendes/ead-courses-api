@@ -40,15 +40,10 @@ class TestUniversityModels(TestCase):
                 password='password',
                 name='Test name'
             )
-        subject1 =models.Subject.objects.create(name='Subject One')
-        subject2 =models.Subject.objects.create(name='Subject Two')
-        subjects = [subject1, subject2]
         teacher = models.Teacher.objects.create(
             user=user,
             salary='1200.00',
         )
-        teacher.subjects.set(subjects)
-        teacher.save()
         self.assertEqual(str(teacher), user.name)
     
     def test_subject_str(self):
@@ -56,3 +51,9 @@ class TestUniversityModels(TestCase):
         name = 'Test Subject'
         subject = models.Subject.objects.create(name=name)
         self.assertEqual(str(subject), name)
+    
+    def test_course_str(self):
+        """Test the course string representation"""
+        name = 'Test Course'
+        course = models.Course.objects.create(name=name)
+        self.assertEqual(str(course), name)

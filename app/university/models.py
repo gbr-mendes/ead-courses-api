@@ -42,13 +42,25 @@ class Teacher(models.Model):
         default=dateformat.format(timezone.now(), 'Y-m-d')
         )
     salary = models.DecimalField(max_digits=10, decimal_places=2)
-    subjects = models.ManyToManyField('Subject', blank=True)
 
     def __str__(self):
         return self.user.name
 
 class Subject(models.Model):
     name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
+
+
+class Course(models.Model):
+    id = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+        editable=False
+        )
+    name = models.CharField(max_length=255)
+    subjects = models.ManyToManyField(Subject, blank=True)
 
     def __str__(self):
         return self.name
