@@ -27,16 +27,6 @@ class UserManager(BaseUserManager):
         return user
 
 
-class UserType(models.Model):
-    id = models.UUIDField(default=uuid.uuid4,
-                          primary_key=True,
-                          editable=False)
-    name = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.name
-
-
 class User(AbstractBaseUser, PermissionsMixin):
     """Custom user model that suports using email instead username"""
     id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False)
