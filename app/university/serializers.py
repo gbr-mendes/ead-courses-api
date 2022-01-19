@@ -20,3 +20,20 @@ class EmployeeSerializer(serializers.ModelSerializer):
         user = get_user_model().objects.create_user(**user_data)
         employee = models.Employee.objects.create(**validated_data, user=user)
         return employee
+
+
+class TeacherSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    subjects = serializers.PrimaryKeyRelatedField(many=True, queryset=models.Subject.objects.all())
+
+    class Meta:
+        model = models.Teacher
+        fields = ('id', 'user', 'hired_date', 'salary', 'subjects')
+    
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        subjects = validated_data.pop('subjects')   
+        user = get_user_model().objects.create_user(**user_data)
+        teacher = models.Teacher.objects.create(**validated_data, user=user)
+        teacher.subjects.set(subjects)
+        return teacher
