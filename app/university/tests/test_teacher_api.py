@@ -50,6 +50,7 @@ class TestPublicTeacherAPIRequests(TestCase):
         self.teacher_payload = {
             'user': self.user_payload,
             'salary': '1200.00',
+            'subjects': []
         }
 
     def test_create_teacher_fail(self):
@@ -111,6 +112,7 @@ class TestPrivateTeacherAPIRequests(TestCase):
         self.teacher_payload = {
             'user': self.user_payload,
             'salary': '1200.00',
+            'subjects': []
         }
     
     def test_create_teacher_success(self):

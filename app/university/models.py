@@ -52,6 +52,7 @@ class Teacher(models.Model):
         default=dateformat.format(timezone.now(), 'Y-m-d')
         )
     salary = models.DecimalField(max_digits=10, decimal_places=2)
+    subjects = models.ManyToManyField('Subject', blank=True)
 
     def __str__(self):
         return self.user.name
