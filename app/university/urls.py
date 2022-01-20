@@ -20,5 +20,10 @@ urlpatterns = [
             'course/',
             views.CreateCourseAPIView.as_view(),
             name='create_course'
+        ),
+    path(
+            'lesson/',
+            views.CreateLessonAPIView.as_view(),
+            name='create_lesson'
         )
 ]

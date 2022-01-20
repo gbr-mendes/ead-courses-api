@@ -25,7 +25,7 @@ class PublicCourseAPITest(TestCase):
         res = self.client.post(CREATE_COURSE_URL, self.course_payload)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_create_course_forbiden(self):
+    def test_create_course_forbidden(self):
         """Test creating a course with a unathorized user"""
         user = HelperTest.create_user(
             name='Test User',

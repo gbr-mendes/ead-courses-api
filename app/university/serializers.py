@@ -53,3 +53,43 @@ class CourseSerializer(serializers.ModelSerializer):
         model = models.Course
         fields = ('id', 'name', 'subjects')
         extra_kwargs = {'id': {'read_only': True}}
+
+
+class SubjectFilteredPrimaryKeyRelatedField(
+        serializers.PrimaryKeyRelatedField):
+    """Filter queryset of lessons on browsable api"""
+    def get_queryset(self):
+        request = self.context.get('request', None)
+        queryset = super(SubjectFilteredPrimaryKeyRelatedField, self)\
+            .get_queryset()
+        if not request or not queryset:
+            return None
+        teacher = models.Teacher.objects.get(user__email=request.user.email)
+        queryset = teacher.subjects.all()
+        return queryset
+
+
+class LessonSerializer(serializers.ModelSerializer):
+    subject = SubjectFilteredPrimaryKeyRelatedField(
+        queryset=models.Subject.objects.all()
+    )
+
+    class Meta:
+        model = models.Lesson
+        fields = ('id', 'title', 'textual_content', 'video_url', 'subject')
+        extra_kwargs = {'id': {'read_only': True}}
+
+    def validate(self, attrs):
+        request = self.context.get('request', None)
+        if not request:
+            return None
+        subject = attrs['subject']
+        user = request.user
+        teacher = models.Teacher.objects.get(user__email=user.email)
+        subject_set = teacher.subjects.all()
+        if subject not in subject_set:
+            raise serializers.ValidationError(
+                "The teacher cannot assign a lesson to a\
+                subject he does not teach"
+                )
+        return super().validate(attrs)

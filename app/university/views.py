@@ -3,9 +3,10 @@ from rest_framework import generics
 from university.serializers import (
                                         EmployeeSerializer,
                                         TeacherSerializer,
-                                        CourseSerializer
+                                        CourseSerializer,
+                                        LessonSerializer
                                     )
-from university.permissions import SchoolAdministrators
+from university.permissions import SchoolAdministrators, Teachers
 from university import models
 
 
@@ -28,3 +29,9 @@ class CreateCourseAPIView(generics.ListCreateAPIView):
     serializer_class = CourseSerializer
     permission_classes = (SchoolAdministrators,)
     queryset = models.Course.objects.all()
+
+
+class CreateLessonAPIView(generics.CreateAPIView):
+    """Create a new lesson on the system"""
+    serializer_class = LessonSerializer
+    permission_classes = (Teachers,)

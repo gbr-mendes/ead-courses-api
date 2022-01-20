@@ -16,3 +16,16 @@ class SchoolAdministrators(permissions.BasePermission):
             return True
 
         return False
+
+
+class Teachers(permissions.BasePermission):
+
+    def has_permission(self, request, view):
+        allowed_groups = ('Teachers',)
+        if request.user.is_superuser:
+            return True
+
+        if is_in_multiple_groups(request.user, allowed_groups):
+            return True
+
+        return False
