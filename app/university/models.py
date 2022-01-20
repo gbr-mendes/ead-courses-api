@@ -38,6 +38,7 @@ class Job(models.Model):
     def __str__(self):
         return self.name
 
+
 class Teacher(models.Model):
     id = models.UUIDField(
         default=uuid.uuid4,
@@ -56,6 +57,7 @@ class Teacher(models.Model):
 
     def __str__(self):
         return self.user.name
+
 
 class Subject(models.Model):
     id = models.UUIDField(
@@ -80,3 +82,20 @@ class Course(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Lesson(models.Model):
+    id = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+        editable=False
+        )
+    title = models.CharField(max_length=255)
+    textual_content = models.TextField()
+    video_url = models.URLField(blank=True)
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    # pdf = models.FileField(blank=True)
+    # featured_image = models.ImageField(upload_to='images/%Y/%m')
+
+    def __str__(self):
+        return self.title

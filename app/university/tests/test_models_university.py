@@ -32,7 +32,7 @@ class TestUniversityModels(TestCase):
             name='Test Job'
         )
         self.assertEqual(str(job), job.name)
-    
+
     def test_teacher_str(self):
         """Test the techer string representation"""
         user = create_user(
@@ -45,15 +45,27 @@ class TestUniversityModels(TestCase):
             salary='1200.00',
         )
         self.assertEqual(str(teacher), user.name)
-    
+
     def test_subject_str(self):
         """Test the subject string repreentation"""
         name = 'Test Subject'
         subject = models.Subject.objects.create(name=name)
         self.assertEqual(str(subject), name)
-    
+
     def test_course_str(self):
         """Test the course string representation"""
         name = 'Test Course'
         course = models.Course.objects.create(name=name)
         self.assertEqual(str(course), name)
+
+    def test_lesson_str(self):
+        """Test the lesson string respresentation"""
+        title = 'Test Lesson'
+        subject = models.Subject.objects.create(name='Test Subject')
+        lesson = models.Lesson.objects.create(
+            title=title,
+            textual_content='Text Lesson',
+            subject=subject
+
+        )
+        self.assertEqual(str(lesson), title)

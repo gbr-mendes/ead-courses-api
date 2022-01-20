@@ -13,7 +13,7 @@ urlpatterns = [
         ),
     path(
             'teacher/',
-            views.CreateTeacherAPIView.as_view()           ,
+            views.CreateTeacherAPIView.as_view(),
             name='create_teacher'
         ),
     path(

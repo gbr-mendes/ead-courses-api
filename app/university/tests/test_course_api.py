@@ -35,12 +35,12 @@ class PublicCourseAPITest(TestCase):
             'name': 'Test Course',
             'subjects': []
         }
-    
+
     def test_create_employee_unathorized(self):
         """Test creating a course with a unathenticated request"""
         res = self.client.post(CREATE_COURSE_URL, self.course_payload)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-    
+
     def test_create_course_forbiden(self):
         """Test creating a course with a unathorized user"""
         user = get_user_model().objects.create_user(
@@ -68,7 +68,6 @@ class PrivateCourseAPITest(TestCase):
         allowed_groups_list = ('School Admin',)
         create_allowed_groups(allowed_groups_list)
         add_user_allowed_group(self.user, allowed_groups_list)
-        
 
         self.course_payload = {
             'name': 'Test Course',

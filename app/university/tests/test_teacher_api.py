@@ -114,7 +114,7 @@ class TestPrivateTeacherAPIRequests(TestCase):
             'salary': '1200.00',
             'subjects': []
         }
-    
+
     def test_create_teacher_success(self):
         """Test creating a teacher successfuly"""
 
@@ -125,7 +125,7 @@ class TestPrivateTeacherAPIRequests(TestCase):
         exists = models.Teacher.objects.filter(
             user__email=self.user_payload['email']).exists()
         self.assertTrue(exists)
-    
+
     def test_create_teacher_with_credentials_already_registered(self):
         """Test creating a teacher with an email already registered"""
         create_user(**self.user_payload)
@@ -133,7 +133,7 @@ class TestPrivateTeacherAPIRequests(TestCase):
                                self.teacher_payload,
                                format='json')
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-    
+
     def test_password_is_too_short(self):
         """Test creating an employee short password"""
         self.user_payload['password'] = 'short'
