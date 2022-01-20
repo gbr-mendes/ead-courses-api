@@ -1,38 +1,13 @@
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.contrib.auth.models import Group
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
-from accounts import models
+from core.utils import HelperTest
 
 GENERATE_TOKEN_USER = reverse('accounts:token')
 ME_URL = reverse('accounts:me')
-
-
-def create_user(**params):
-    return get_user_model().objects.create_user(**params)
-
-
-def create_employee(**params):
-    return models.Employe.objects.create(**params)
-
-
-def create_allowed_groups(groups):
-    for group in groups:
-        Group.objects.create(name=group)
-
-
-def add_user_allowed_group(user, allowed_groups):
-    allowed = False
-    user_groups = user.groups.all()
-    for group in user_groups:
-        if group.name in allowed_groups:
-            return
-    if not allowed:
-        user.groups.add(Group.objects.get(name=allowed_groups[0]))
 
 
 class PublicUserApiTests(TestCase):
@@ -44,7 +19,7 @@ class PublicUserApiTests(TestCase):
                     'name': 'Test Case',
                     'password': 'testCase123'
                     }
-        create_user(**payload)
+        HelperTest.create_user(**payload)
         res = self.client.post(
             GENERATE_TOKEN_USER,
             {
@@ -61,7 +36,7 @@ class PublicUserApiTests(TestCase):
                     'email': 'test@gbmsolucoesweb.com',
                     'password': 'testCase123'
                     }
-        create_user(**payload)
+        HelperTest.create_user(**payload)
         res = self.client.post(
             GENERATE_TOKEN_USER,
             {
@@ -109,7 +84,7 @@ class PublicUserApiTests(TestCase):
 class PrivateUserApiTests(TestCase):
     """Test requests that require authentication"""
     def setUp(self):
-        self.user = create_user(
+        self.user = HelperTest.create_user(
             name='Test Name',
             email='authtest@user.com',
             password='password'

@@ -1,11 +1,7 @@
 from django.test import TestCase
-from django.contrib.auth import get_user_model
 
 from university import models
-
-
-def create_user(**params):
-    return get_user_model().objects.create_user(**params)
+from core.utils import HelperTest
 
 
 class TestUniversityModels(TestCase):
@@ -13,7 +9,7 @@ class TestUniversityModels(TestCase):
     def test_employee_str(self):
         """Test the employee string representaion"""
         employee = models.Employee.objects.create(
-            user=create_user(
+            user=HelperTest.create_user(
                 email='test@emailtest.com',
                 password='password',
                 name='Test name'
@@ -35,7 +31,7 @@ class TestUniversityModels(TestCase):
 
     def test_teacher_str(self):
         """Test the techer string representation"""
-        user = create_user(
+        user = HelperTest.create_user(
                 email='test@emailtest.com',
                 password='password',
                 name='Test name'

@@ -1,37 +1,14 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from django.contrib.auth.models import Group
 
 from rest_framework.test import APIClient
 from rest_framework import status
 
 from university import models
+from core.utils import HelperTest
 
 CREATE_EMPLOYEE_URL = reverse('university:create_employee')
-
-
-def create_user(**params):
-    return get_user_model().objects.create_user(**params)
-
-
-def create_employee(**params):
-    return models.Employee.objects.create(**params)
-
-
-def create_allowed_groups(groups):
-    for group in groups:
-        Group.objects.create(name=group)
-
-
-def add_user_allowed_group(user, allowed_groups):
-    allowed = False
-    user_groups = user.groups.all()
-    for group in user_groups:
-        if group.name in allowed_groups:
-            return
-    if not allowed:
-        user.groups.add(Group.objects.get(name=allowed_groups[0]))
 
 
 class PublicUserApiTests(TestCase):
@@ -75,7 +52,7 @@ class PublicUserApiTests(TestCase):
     def test_create_employee_forbiden(self):
         """Test creating an employee with an user that is not allowed"""
 
-        user = create_user(
+        user = HelperTest.create_user(
             name='Test User',
             email='testemail@user.com'
         )
@@ -92,7 +69,7 @@ class PublicUserApiTests(TestCase):
 class PrivateUserApiTests(TestCase):
     """Test requests that require authentication"""
     def setUp(self):
-        self.user = create_user(
+        self.user = HelperTest.create_user(
             name='Test Name',
             email='authtest@user.com',
             password='password'
@@ -101,8 +78,8 @@ class PrivateUserApiTests(TestCase):
         self.client.force_authenticate(user=self.user)
 
         allowed_groups_list = ('School Admin',)
-        create_allowed_groups(allowed_groups_list)
-        add_user_allowed_group(self.user, allowed_groups_list)
+        HelperTest.create_allowed_groups(allowed_groups_list)
+        HelperTest.add_user_allowed_group(self.user, allowed_groups_list)
 
         self.user_payload = {
             'name': 'Test Case',
@@ -134,7 +111,7 @@ class PrivateUserApiTests(TestCase):
 
     def test_create_employee_with_credentials_already_registered(self):
         """Test creating an employee with an email already registered"""
-        create_user(**self.user_payload)
+        HelperTest.create_user(**self.user_payload)
         res = self.client.post(CREATE_EMPLOYEE_URL,
                                self.employee_payload,
                                format='json')
