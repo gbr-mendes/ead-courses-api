@@ -24,10 +24,14 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
         if user_data:
+            password = user_data.pop('password', None)
             get_user_model().objects.filter(id=instance.user.id).update(
                     **user_data
                 )
             user = get_user_model().objects.get(id=instance.user.id)
+            if password:
+                user.set_password(password)
+                user.save()
             validated_data['user'] = user
 
         models.Employee.objects.filter(

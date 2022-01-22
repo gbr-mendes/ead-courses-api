@@ -253,3 +253,35 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         employee.refresh_from_db()
         self.assertEqual(employee.user.email, user_payload['email'])
+
+    def test_update_password(self):
+        """Testing update a password from an employee instance"""
+        user = HelperTest.create_user(
+            name='Test Name',
+            email='test@testemail.com',
+            password='password'
+        )
+        employee = HelperTest.create_employee(
+            user=user,
+            salary='1200.00',
+            job=models.Job.objects.create(name='Test Job')
+        )
+        password = 'newpassword'
+        update_payload = {
+            'user': {
+                'password': password
+            }
+        }
+        GET_EMPLOYEE_URL = reverse(
+            'university:retrive_employee',
+            kwargs={'pk': employee.pk}
+        )
+        self.client.patch(
+            GET_EMPLOYEE_URL,
+            update_payload,
+            format='json'
+        )
+        employee.refresh_from_db()
+        self.assertTrue(
+            employee.user.check_password(password)
+        )
