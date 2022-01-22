@@ -10,8 +10,17 @@ from university.permissions import SchoolAdministrators, Teachers
 from university import models
 
 
-class CreateEmployeeAPIView(generics.ListCreateAPIView):
+class CreateListEmployeeAPIView(generics.ListCreateAPIView):
     """Create a new employee in the system"""
+    serializer_class = EmployeeSerializer
+    permission_classes = (SchoolAdministrators,)
+    queryset = models.Employee.objects.all()
+
+
+class RetriveEmployeeAPIView(
+                                generics.DestroyAPIView,
+                                generics.RetrieveUpdateAPIView
+                            ):
     serializer_class = EmployeeSerializer
     permission_classes = (SchoolAdministrators,)
     queryset = models.Employee.objects.all()

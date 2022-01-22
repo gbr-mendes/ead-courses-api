@@ -20,7 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
             'street',
             'state',
             'city',
-            'zip_code'
+            'zip_code',
+            'complement'
         )
         extra_kwargs = {'password': {'write_only': True, 'min_length': 7},
                         'id': {'read_only': True}}

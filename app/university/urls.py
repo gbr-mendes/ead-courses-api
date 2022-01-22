@@ -8,8 +8,13 @@ app_name = "university"
 urlpatterns = [
     path(
             'employee/',
-            views.CreateEmployeeAPIView.as_view(),
-            name="create_employee"
+            views.CreateListEmployeeAPIView.as_view(),
+            name="create_list_employee"
+        ),
+    path(
+            'retrive-employee/<uuid:pk>',
+            views.RetriveEmployeeAPIView.as_view(),
+            name='retrive_employee'
         ),
     path(
             'teacher/',

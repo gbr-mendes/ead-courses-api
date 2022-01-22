@@ -1,7 +1,8 @@
+import uuid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
-from university.models import Employee
+from university import models
 
 
 class HelperTest:
@@ -15,7 +16,7 @@ class HelperTest:
 
     @staticmethod
     def create_employee(**params):
-        return Employee.objects.create(**params)
+        return models.Employee.objects.create(**params)
 
     @staticmethod
     def create_allowed_groups(groups):
@@ -40,4 +41,24 @@ class HelperTest:
             group_names.append(group.name)
         if name in group_names:
             return True
-
+    
+    @staticmethod
+    def create_multiples_employee(quantity):
+        """Create multiples employee and return they email"""
+        list_employee_email = []
+        for count in range(0, quantity):
+            user = get_user_model().objects.create_user(
+                name=f'Test Name {count}',
+                email=f'test{count}@testemail.com',
+                password='password'
+            )
+            employee = models.Employee.objects.create(
+                user=user,
+                salary='1200.00',
+                job=models.Job.objects.create(
+                    name='Test Job'
+                )
+            )
+            list_employee_email.append(employee.user.email)
+        return list_employee_email
+    

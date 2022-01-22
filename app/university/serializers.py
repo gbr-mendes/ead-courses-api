@@ -20,7 +20,44 @@ class EmployeeSerializer(serializers.ModelSerializer):
         user = get_user_model().objects.create_user(**user_data)
         employee = models.Employee.objects.create(**validated_data, user=user)
         return employee
-
+    
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            user = instance.user
+            if 'name' in user_data.keys():
+                user.name = user_data['name']
+            if 'email' in user_data.keys():
+                user.email = user_data['email']
+            if 'password' in user_data.keys():
+                user.set_password(user_data['password'])
+            if 'cpf' in user_data.keys():
+                user.cpf = user_data['cpf']
+            if 'phone' in user_data.keys():
+                user.phone = user_data['phone']
+            if 'street' in user_data.keys():
+                user.street = user_data['street']
+            if 'state' in user_data.keys():
+                user.state = user_data['state']
+            if 'city' in user_data.keys():
+                user.city = user_data['city']
+            if 'zip_code' in user_data.keys():
+                user.zip_code = user_data['zip_code']
+            if 'complement' in user_data.keys():
+                user.complement = user_data['complement']
+            user.save()
+            instance.user = user
+        
+        if 'hired_date' in validated_data.keys():
+            instance.hired_date = validated_data['hired_date']
+        
+        if 'job' in validated_data.keys():
+            instance.job = validated_data['job']
+        
+        if 'salary' in validated_data.keys():
+            instance.salary = validated_data['salary']        
+        instance.save()
+        return instance
 
 class TeacherSerializer(serializers.ModelSerializer):
     user = UserSerializer()
