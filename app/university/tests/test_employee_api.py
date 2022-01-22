@@ -132,14 +132,15 @@ class PrivateUserApiTests(TestCase):
     def test_list_employee_success(self):
         """Test listing employees to allowed user"""
         quantity_employee = 3
-        list_employee_email = HelperTest.create_multiples_employee(quantity_employee)
+        list_employee_email = HelperTest\
+            .create_multiples_employee(quantity_employee)
         res = self.client.get(CREATE_LIST_EMPLOYEE_URL)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), quantity_employee)
-        
+
         for employee in res.data:
             self.assertIn(employee['user']['email'], list_employee_email)
-    
+
     def test_get_especific_employee(self):
         """Test geting an especific employee"""
         user = HelperTest.create_user(
@@ -152,11 +153,12 @@ class PrivateUserApiTests(TestCase):
             salary='1200.00',
             job=models.Job.objects.create(name='Test Job')
         )
-        GET_EMPLOYEE_URL = reverse('university:retrive_employee', kwargs={'pk':employee.pk})
-        res = self.client.get(GET_EMPLOYEE_URL, {'pk':employee.pk})
+        GET_EMPLOYEE_URL = reverse('university:retrive_employee',
+                                   kwargs={'pk': employee.pk})
+        res = self.client.get(GET_EMPLOYEE_URL, {'pk': employee.pk})
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(employee.user.email, res.data['user']['email'])
-    
+
     def test_delete_employee(self):
         """Test deleting employee"""
         user = HelperTest.create_user(
@@ -169,10 +171,12 @@ class PrivateUserApiTests(TestCase):
             salary='1200.00',
             job=models.Job.objects.create(name='Test Job')
         )
-        GET_EMPLOYEE_URL = reverse('university:retrive_employee', kwargs={'pk':employee.pk})
-        res = self.client.delete(GET_EMPLOYEE_URL, args={'pk':employee.pk})
+        GET_EMPLOYEE_URL = reverse('university:retrive_employee',
+                                   kwargs={'pk': employee.pk})
+        res = self.client.delete(GET_EMPLOYEE_URL, args={'pk': employee.pk})
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
-        exists = models.Employee.objects.filter(user__email=employee.user.email).exists()
+        exists = models.Employee.objects.\
+            filter(user__email=employee.user.email).exists()
         self.assertFalse(exists)
 
     def test_employee_full_update_success(self):
@@ -204,12 +208,19 @@ class PrivateUserApiTests(TestCase):
             'salary': '2500.00',
             'job': models.Job.objects.create(name='Updated Job').id
         }
-        GET_EMPLOYEE_URL = reverse('university:retrive_employee', kwargs={'pk':employee.pk})
-        res = self.client.put(GET_EMPLOYEE_URL, employee_payload, format='json')
+        GET_EMPLOYEE_URL = reverse(
+            'university:retrive_employee',
+            kwargs={'pk': employee.pk}
+        )
+        res = self.client.put(
+            GET_EMPLOYEE_URL,
+            employee_payload,
+            format='json'
+        )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         employee.refresh_from_db()
         self.assertEqual(employee.user.name, user_payload['name'])
-    
+
     def test_update_partial_employee(self):
         """Test updating some fields for an employee"""
         user = HelperTest.create_user(
@@ -230,8 +241,15 @@ class PrivateUserApiTests(TestCase):
             'user': user_payload,
             'salary': '2500.00',
         }
-        GET_EMPLOYEE_URL = reverse('university:retrive_employee', kwargs={'pk':employee.pk})
-        res = self.client.patch(GET_EMPLOYEE_URL, employee_payload, format='json')
+        GET_EMPLOYEE_URL = reverse(
+            'university:retrive_employee',
+            kwargs={'pk': employee.pk}
+        )
+        res = self.client.patch(
+            GET_EMPLOYEE_URL,
+            employee_payload,
+            format='json'
+        )
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         employee.refresh_from_db()
         self.assertEqual(employee.user.email, user_payload['email'])

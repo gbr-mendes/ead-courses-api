@@ -1,4 +1,3 @@
-import uuid
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 
@@ -32,7 +31,7 @@ class HelperTest:
                 return
         if not allowed:
             user.groups.add(Group.objects.get(name=allowed_groups[0]))
-        
+
     @staticmethod
     def check_group_name_on_user_group_set(user, name):
         """Check a name on the group set of a user"""
@@ -41,7 +40,7 @@ class HelperTest:
             group_names.append(group.name)
         if name in group_names:
             return True
-    
+
     @staticmethod
     def create_multiples_employee(quantity):
         """Create multiples employee and return they email"""
@@ -61,4 +60,3 @@ class HelperTest:
             )
             list_employee_email.append(employee.user.email)
         return list_employee_email
-    

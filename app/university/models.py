@@ -3,7 +3,6 @@ import datetime
 
 from django.db import models
 from django.conf import settings
-from django.utils import timezone, dateformat
 from django.db.models.signals import post_save
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -104,12 +103,13 @@ class Lesson(models.Model):
     def __str__(self):
         return self.title
 
+
 # Signals
 def add_employee_to_group(sender, instance, created, **kwargs):
     if created:
         user = get_user_model().objects.get(email=instance.user.email)
         group, created_bool = Group.objects.get_or_create(name='School Admin')
-        
+
         user.groups.add(group.id)
         user.save()
 
@@ -121,6 +121,7 @@ def add_teacher_to_group(sender, instance, created, **kwargs):
 
         user.groups.add(group.id)
         user.save()
+
 
 post_save.connect(add_employee_to_group, sender=Employee)
 post_save.connect(add_teacher_to_group, sender=Teacher)

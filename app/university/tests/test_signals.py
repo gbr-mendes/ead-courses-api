@@ -23,9 +23,11 @@ class TestImplementedSignals(TestCase):
             job=models.Job.objects.create(name='Test Job')
         )
 
-        self.assertTrue(HelperTest\
-            .check_group_name_on_user_group_set(self.user, 'School Admin'))
-        
+        self.assertTrue(HelperTest .check_group_name_on_user_group_set(
+            self.user,
+            'School Admin'
+        ))
+
     def test_teacher_added_to_group(self):
         """Test that a teacher is added \
         to Teacher groups after created (pos-save)"""
@@ -33,6 +35,8 @@ class TestImplementedSignals(TestCase):
             user=self.user,
             salary='1200.00',
         )
-        
-        self.assertTrue(HelperTest\
-            .check_group_name_on_user_group_set(self.user, 'Teachers'))
+
+        self.assertTrue(HelperTest.check_group_name_on_user_group_set(
+            self.user,
+            'Teachers'
+        ))
