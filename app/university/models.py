@@ -1,8 +1,12 @@
 import uuid
+import datetime
 
 from django.db import models
 from django.conf import settings
 from django.utils import timezone, dateformat
+from django.db.models.signals import post_save
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 
 
 class Employee(models.Model):
@@ -18,7 +22,7 @@ class Employee(models.Model):
         )
 
     hired_date = models.DateField(
-        default=dateformat.format(timezone.now(), 'Y-m-d')
+        default=datetime.date.today
         )
     salary = models.DecimalField(max_digits=10, decimal_places=2)
     job = models.ForeignKey('Job', on_delete=models.PROTECT)
@@ -50,7 +54,7 @@ class Teacher(models.Model):
         on_delete=models.CASCADE
         )
     hired_date = models.DateField(
-        default=dateformat.format(timezone.now(), 'Y-m-d')
+        default=datetime.date.today
         )
     salary = models.DecimalField(max_digits=10, decimal_places=2)
     subjects = models.ManyToManyField('Subject', blank=True)
@@ -99,3 +103,24 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.title
+
+# Signals
+def add_employee_to_group(sender, instance, created, **kwargs):
+    if created:
+        user = get_user_model().objects.get(email=instance.user.email)
+        group, created_bool = Group.objects.get_or_create(name='School Admin')
+        
+        user.groups.add(group.id)
+        user.save()
+
+
+def add_teacher_to_group(sender, instance, created, **kwargs):
+    if created:
+        user = get_user_model().objects.get(email=instance.user.email)
+        group, created_bool = Group.objects.get_or_create(name='Teachers')
+
+        user.groups.add(group.id)
+        user.save()
+
+post_save.connect(add_employee_to_group, sender=Employee)
+post_save.connect(add_teacher_to_group, sender=Teacher)
