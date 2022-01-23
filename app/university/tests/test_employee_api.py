@@ -220,6 +220,8 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         employee.refresh_from_db()
         self.assertEqual(employee.user.name, user_payload['name'])
+        self.assertEqual(employee.user.email, user_payload['email'])
+        self.assertEqual(employee.job.id, employee_payload['job'])
 
     def test_update_partial_employee(self):
         """Test updating some fields for an employee"""
@@ -253,6 +255,7 @@ class PrivateUserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         employee.refresh_from_db()
         self.assertEqual(employee.user.email, user_payload['email'])
+        self.assertEqual(employee.user.cpf, user_payload['cpf'])
 
     def test_update_password(self):
         """Testing update a password from an employee instance"""

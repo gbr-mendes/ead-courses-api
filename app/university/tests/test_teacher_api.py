@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -81,7 +83,7 @@ class TestPrivateTeacherAPIRequests(TestCase):
 
         self.user_payload = {
             'name': 'Test Case',
-            'email': 'test@email.com',
+            'email': 'teacher@email.com',
             'password': 'password',
             'cpf': '516.040.900-90',
             'phone': '19 99999-9999',
@@ -126,3 +128,172 @@ class TestPrivateTeacherAPIRequests(TestCase):
         user_exists = get_user_model().objects\
             .filter(email=self.user_payload['email']).exists()
         self.assertFalse(user_exists)
+
+    def test_retrive_teacher_success(self):
+        """Test get an especific teacher"""
+        user = HelperTest.create_user(
+            name='Test User',
+            email='testuser@email.com',
+            password='password'
+        )
+        teacher = models.Teacher.objects.create(
+            user=user,
+            salary='2500.00',
+        )
+        GET_TEACHER_URL = reverse(
+            'university:retrive_teacher',
+            kwargs={'pk': teacher.pk}
+        )
+
+        res = self.client.get(GET_TEACHER_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(teacher.user.email, res.data['user']['email'])
+
+    def test_delete_teacher(self):
+        """Test deleting an especifi teacher"""
+        user = HelperTest.create_user(
+            name='Test User',
+            email='testuser@email.com',
+            password='password'
+        )
+        teacher = models.Teacher.objects.create(
+            user=user,
+            salary='2500.00',
+        )
+        GET_TEACHER_URL = reverse(
+            'university:retrive_teacher',
+            kwargs={'pk': teacher.pk}
+        )
+        res = self.client.delete(GET_TEACHER_URL)
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        exists = models.Teacher.objects.filter(
+            id=teacher.id
+        ).exists()
+        self.assertFalse(exists)
+
+    def test_update_full_teacher(self):
+        """Test updating all the fields of a teacher (PUT)"""
+        user = HelperTest.create_user(
+            name='Test User',
+            email='testuser@email.com',
+            password='password'
+        )
+        teacher = models.Teacher.objects.create(
+            user=user,
+            salary='2500.00',
+        )
+        GET_TEACHER_URL = reverse(
+            'university:retrive_teacher',
+            kwargs={'pk': teacher.pk}
+        )
+        update_payload = {
+            'user': {
+                'name': 'Test Update',
+                'email': 'update@teacher.com',
+                'password': 'newpassword',
+                'cpf': '015.207.600-00',
+                'phone': '11 99999-8888',
+                'street': 'Beco Antônio Pinto',
+                'state': 'AM',
+                'city': 'Manaus',
+                'zip_code': '69063-420',
+                'complement': ''
+            },
+            'hired_date': date.today(),
+            'salary': '5400.00',
+            'subjects': [
+                models.Subject.objects.create(
+                    name='Update Subject1').id,
+                models.Subject.objects.create(
+                    name='Update Subject2').id,
+            ]
+        }
+
+        res = self.client.put(
+            GET_TEACHER_URL,
+            update_payload,
+            format='json'
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        teacher.refresh_from_db()
+        self.assertEqual(teacher.user.email, update_payload['user']['email'])
+        self.assertEqual(teacher.user.name, update_payload['user']['name'])
+        self.assertEqual(
+            teacher.user.complement,
+            update_payload['user']['complement']
+        )
+
+    def test_update_partial_teacher(self):
+        """Test updating some fields of a teacher (PATCH)"""
+        user = HelperTest.create_user(
+            name='Test User',
+            email='testuser@email.com',
+            password='password'
+        )
+        teacher = models.Teacher.objects.create(
+            user=user,
+            salary='2500.00',
+        )
+        GET_TEACHER_URL = reverse(
+            'university:retrive_teacher',
+            kwargs={'pk': teacher.pk}
+        )
+        update_payload = {
+            'user': {
+                'name': 'Test Update',
+                'email': 'update@teacher.com',
+                'complement': 'New Complement'
+            },
+            'salary': '5400.00'
+        }
+
+        res = self.client.patch(
+            GET_TEACHER_URL,
+            update_payload,
+            format='json'
+        )
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        teacher.refresh_from_db()
+        self.assertEqual(
+            teacher.user.email,
+            update_payload['user']['email']
+        )
+        self.assertEqual(teacher.user.name, update_payload['user']['name'])
+        self.assertEqual(
+            teacher.user.complement,
+            update_payload['user']['complement']
+        )
+
+    def test_update_password(self):
+        """Testing update a password from an teacher instance"""
+        user = HelperTest.create_user(
+            name='Test Name',
+            email='test@testemail.com',
+            password='password'
+        )
+        teacher = models.Teacher.objects.create(
+            user=user,
+            salary='1200.00',
+        )
+        password = 'newpassword'
+        update_payload = {
+            'user': {
+                'password': password
+            }
+        }
+        GET_TEACHER_URL = reverse(
+                'university:retrive_teacher',
+                kwargs={'pk': teacher.pk}
+            )
+
+        self.client.patch(
+            GET_TEACHER_URL,
+            update_payload,
+            format='json'
+        )
+        teacher.refresh_from_db()
+        self.assertTrue(
+            teacher.user.check_password(password)
+        )

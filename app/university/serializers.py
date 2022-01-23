@@ -61,6 +61,31 @@ class TeacherSerializer(serializers.ModelSerializer):
         teacher.subjects.set(subjects)
         return teacher
 
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        subjects = validated_data.pop('subjects', None)
+        if user_data:
+            password = user_data.pop('password', None)
+            get_user_model().objects\
+                .filter(id=instance.user.id).update(
+                    **user_data
+                )
+            user = get_user_model().objects.get(id=instance.user.id)
+            if password:
+                user.set_password(password)
+                user.save()
+            validated_data['user'] = user
+
+        models.Teacher.objects.filter(
+            id=instance.id
+        ).update(**validated_data)
+
+        if subjects:
+            instance.subjects.set(subjects)
+            instance.save()
+
+        return instance
+
 
 class CourseSerializer(serializers.ModelSerializer):
     subjects = serializers.PrimaryKeyRelatedField(

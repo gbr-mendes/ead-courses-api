@@ -21,6 +21,7 @@ class RetriveEmployeeAPIView(
                                 generics.DestroyAPIView,
                                 generics.RetrieveUpdateAPIView
                             ):
+    """Retrive an especific employee"""
     serializer_class = EmployeeSerializer
     permission_classes = (SchoolAdministrators,)
     queryset = models.Employee.objects.all()
@@ -28,6 +29,16 @@ class RetriveEmployeeAPIView(
 
 class CreateTeacherAPIView(generics.ListCreateAPIView):
     """Create a new Teacher in the system"""
+    serializer_class = TeacherSerializer
+    permission_classes = (SchoolAdministrators,)
+    queryset = models.Teacher.objects.all()
+
+
+class RetriveTeacherAPIView(
+                                    generics.RetrieveUpdateAPIView,
+                                    generics.DestroyAPIView
+                              ):
+    """Retrive an especific teacher"""
     serializer_class = TeacherSerializer
     permission_classes = (SchoolAdministrators,)
     queryset = models.Teacher.objects.all()
