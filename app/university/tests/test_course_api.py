@@ -66,3 +66,71 @@ class PrivateCourseAPITest(TestCase):
             id=res.data['id']
         ).exists()
         self.assertTrue(exists)
+
+    def test_retrive_course_success(self):
+        """Test retrive course to allowed user"""
+        course = models.Course.objects.create(name='Test Course')
+        RETRIVE_COURSE_URL = reverse(
+            'university:retrive_course',
+            kwargs={'pk': course.pk}
+        )
+        res = self.client.get(RETRIVE_COURSE_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(str(course.id), res.data['id'])
+
+    def test_update_full_course(self):
+        """Test update all fields course"""
+        subjects = [
+            models.Subject.objects.create(name='Subject 1').id,
+            models.Subject.objects.create(name='Subject 2').id
+        ]
+        course = models.Course.objects.create(name='Test Course')
+        course.subjects.set(subjects)
+        course.save()
+        subjects_payload = [
+            models.Subject.objects.create(name='Subject Update1').id,
+            models.Subject.objects.create(name='Subject Update2').id,
+        ]
+        course_payload = {
+            'name': 'New Name Course',
+            'subjects': subjects_payload
+        }
+        RETRIVE_COURSE_URL = reverse(
+            'university:retrive_course',
+            kwargs={'pk': course.pk}
+        )
+        res = self.client.put(
+            RETRIVE_COURSE_URL,
+            course_payload,
+            format='json'
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        course.refresh_from_db()
+        self.assertEqual(course.name, course_payload['name'])
+        self.assertEqual(len(res.data['subjects']), 2)
+
+        subjects_id = []
+        for subject in course.subjects.all():
+            subjects_id.append(str(subject.id))
+
+        for subject in res.data['subjects']:
+            self.assertIn(str(subject), subjects_id)
+
+    def test_update_partial_course(self):
+        """Test updating some fileds of a course"""
+        course = models.Course.objects.create(name='Test Course')
+        course_payload = {
+            'name': 'New Name Course'
+        }
+        RETRIVE_COURSE_URL = reverse(
+            'university:retrive_course',
+            kwargs={'pk': course.pk}
+        )
+        res = self.client.patch(
+            RETRIVE_COURSE_URL,
+            course_payload,
+            format='json'
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        course.refresh_from_db()
+        self.assertEqual(course.name, course_payload['name'])

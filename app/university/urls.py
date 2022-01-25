@@ -32,6 +32,11 @@ urlpatterns = [
             name='create_course'
         ),
     path(
+            'retrive-course/<uuid:pk>',
+            views.RetriveCourseAPIView.as_view(),
+            name='retrive_course'
+        ),
+    path(
             'lesson/',
             views.CreateLessonAPIView.as_view(),
             name='create_lesson'

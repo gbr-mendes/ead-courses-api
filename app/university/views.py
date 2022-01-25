@@ -51,6 +51,16 @@ class CreateCourseAPIView(generics.ListCreateAPIView):
     queryset = models.Course.objects.all()
 
 
+class RetriveCourseAPIView(
+        generics.RetrieveUpdateAPIView,
+        generics.DestroyAPIView
+        ):
+    """Retrive an especific course"""
+    serializer_class = CourseSerializer
+    permission_classes = (SchoolAdministrators,)
+    queryset = models.Course.objects.all()
+
+
 class CreateLessonAPIView(generics.CreateAPIView):
     """Create a new lesson on the system"""
     serializer_class = LessonSerializer
