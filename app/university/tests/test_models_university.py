@@ -65,3 +65,18 @@ class TestUniversityModels(TestCase):
 
         )
         self.assertEqual(str(lesson), title)
+
+    def test_student_str(self):
+        """Test student string representation"""
+        user = HelperTest.create_user(
+                email='test@emailtest.com',
+                password='password',
+                name='Test name'
+            )
+        student = models.Student.objects.create(
+            user=user,
+            course=models.Course.objects.create(
+                name='Test Course'
+            )
+        )
+        self.assertEqual(str(student), user.name)

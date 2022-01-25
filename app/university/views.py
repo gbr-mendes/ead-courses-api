@@ -2,6 +2,7 @@ from rest_framework import generics
 
 from university.serializers import (
                                         EmployeeSerializer,
+                                        StudentSerializer,
                                         TeacherSerializer,
                                         CourseSerializer,
                                         LessonSerializer
@@ -42,6 +43,22 @@ class RetriveTeacherAPIView(
     serializer_class = TeacherSerializer
     permission_classes = (SchoolAdministrators,)
     queryset = models.Teacher.objects.all()
+
+
+class CreateStudentAPIView(generics.ListCreateAPIView):
+    """Create a new student in the system"""
+    serializer_class = StudentSerializer
+    permission_classes = (SchoolAdministrators,)
+    queryset = models.Student.objects.all()
+
+
+class RetriveStudentAPIView(
+        generics.RetrieveUpdateAPIView,
+        generics.DestroyAPIView
+        ):
+    serializer_class = StudentSerializer
+    permission_classes = (SchoolAdministrators,)
+    queryset = models.Student.objects.all()
 
 
 class CreateCourseAPIView(generics.ListCreateAPIView):

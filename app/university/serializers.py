@@ -137,3 +137,40 @@ class LessonSerializer(serializers.ModelSerializer):
                 subject he does not teach"
                 )
         return super().validate(attrs)
+
+
+class StudentSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    course = serializers.PrimaryKeyRelatedField(
+        queryset=models.Course.objects.all()
+    )
+
+    class Meta:
+        model = models.Student
+        fields = ('id', 'user', 'course')
+        extra_kwargs = {'id': {'read_only': True}}
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = get_user_model().objects.create_user(**user_data)
+        student = models.Student.objects.create(**validated_data, user=user)
+        return student
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        if user_data:
+            password = user_data.pop('password', None)
+            get_user_model().objects.filter(id=instance.user.id).update(
+                    **user_data
+                )
+            user = get_user_model().objects.get(id=instance.user.id)
+            if password:
+                user.set_password(password)
+                user.save()
+            validated_data['user'] = user
+
+        models.Student.objects.filter(
+            id=instance.id
+        ).update(**validated_data)
+
+        return instance

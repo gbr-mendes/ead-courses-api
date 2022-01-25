@@ -27,6 +27,16 @@ urlpatterns = [
             name='retrive_teacher'
         ),
     path(
+        'student/',
+        views.CreateStudentAPIView.as_view(),
+        name='create_student'
+        ),
+    path(
+            'retrive-student/<uuid:pk>',
+            views.RetriveStudentAPIView.as_view(),
+            name='retrive_student'
+        ),
+    path(
             'course/',
             views.CreateCourseAPIView.as_view(),
             name='create_course'

@@ -104,6 +104,22 @@ class Lesson(models.Model):
         return self.title
 
 
+class Student(models.Model):
+    id = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+        editable=False
+        )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+        )
+    course = models.ForeignKey(Course, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.user.name
+
+
 # Signals
 def add_employee_to_group(sender, instance, created, **kwargs):
     if created:

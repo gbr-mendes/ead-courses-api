@@ -60,3 +60,22 @@ class HelperTest:
             )
             list_employee_email.append(employee.user.email)
         return list_employee_email
+
+    @staticmethod
+    def create_multiples_student(quantity):
+        """Create multiples students and return they email"""
+        list_student_email = []
+        for count in range(0, quantity):
+            user = get_user_model().objects.create_user(
+                name=f'Test Name {count}',
+                email=f'test{count}@testemail.com',
+                password='password'
+            )
+            student = models.Student.objects.create(
+                user=user,
+                course=models.Course.objects.create(
+                    name='Test Course'
+                )
+            )
+            list_student_email.append(student.user.email)
+        return list_student_email
