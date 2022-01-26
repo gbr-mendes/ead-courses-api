@@ -86,3 +86,61 @@ class PrivateLessonApiTest(TestCase):
 
         res = self.client.post(CREATE_LESSON_URL, self.lesson_payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class WatchLessonAPITest(TestCase):
+    """Tests fo requests to watch lesson endpoint"""
+    def setUp(self):
+        self.client = APIClient()
+        self.user = HelperTest.create_user(
+            name='Student Name',
+            email='student@email.com',
+            password='password'
+        )
+        self.course=models.Course.objects.create(
+                name='Test Course'
+            )
+        self.subjects = [
+            models.Subject.objects.create(name='Subject1'),
+            models.Subject.objects.create(name='Subject2'),
+        ]
+
+        self.course.subjects.set(self.subjects)
+        self.course.save()
+        self.student = models.Student.objects.create(
+            user=self.user,
+            course=self.course
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_watch_lesson_success(self):
+        """Test student watch lesson success"""
+        lesson = models.Lesson.objects.create(
+            title='Lesson Name',
+            textual_content='Some Text',
+            subject=self.subjects[0]
+        )
+
+        LESSON_URL = reverse(
+            'university:watch_lesson',
+            kwargs={'pk': lesson.id}
+        )
+        res = self.client.get(LESSON_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['id'], str(lesson.id))
+
+    def test_watch_lesson_forbiden(self):
+        """Test watch a lesson for a not allowed student"""
+        new_lesson = models.Lesson.objects.create(
+            title='New Lesson Name',
+            textual_content='Some Text',
+            subject=models.Subject.objects.create(
+                name='Subject Lesson'
+            )
+        )
+        LESSON_URL = reverse(
+            'university:watch_lesson',
+            kwargs={'pk': new_lesson.id}
+        )
+        res = self.client.get(LESSON_URL)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)

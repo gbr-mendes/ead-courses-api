@@ -60,5 +60,10 @@ urlpatterns = [
             'create-subject/',
             views.CreateSubjectAPIView.as_view(),
             name='create_subject'
+        ),
+    path(
+            'watch-lesson/<uuid:pk>',
+            views.WatchLessonAPIVIew.as_view(),
+            name='watch_lesson'
         )
 ]
