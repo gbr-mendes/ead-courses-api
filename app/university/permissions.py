@@ -29,3 +29,15 @@ class Teachers(permissions.BasePermission):
             return True
 
         return False
+
+
+class Students(permissions.BasePermission):
+    def has_permission(self, request, view):
+        allowed_groups = ('Students',)
+        if request.user.is_superuser:
+            return True
+
+        if is_in_multiple_groups(request.user, allowed_groups):
+            return True
+
+        return False

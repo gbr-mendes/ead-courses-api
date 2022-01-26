@@ -16,7 +16,7 @@ class TestImplementedSignals(TestCase):
 
     def test_employee_added_to_group(self):
         """Test that the employee is added \
-        to School Admin group after created (pos-save)"""
+        to School Admin group after created (post-save)"""
         HelperTest.create_employee(
             user=self.user,
             salary='1200.00',
@@ -30,7 +30,7 @@ class TestImplementedSignals(TestCase):
 
     def test_teacher_added_to_group(self):
         """Test that a teacher is added \
-        to Teacher groups after created (pos-save)"""
+        to Teacher groups after created (post-save)"""
         models.Teacher.objects.create(
             user=self.user,
             salary='1200.00',
@@ -39,4 +39,17 @@ class TestImplementedSignals(TestCase):
         self.assertTrue(HelperTest.check_group_name_on_user_group_set(
             self.user,
             'Teachers'
+        ))
+
+    def test_student_added_to_group(self):
+        """Test that a student is added \
+        to group after created (post-save)"""
+        models.Student.objects.create(
+            user=self.user,
+            course=models.Course.objects.create(name='Test Course')
+        )
+
+        self.assertTrue(HelperTest.check_group_name_on_user_group_set(
+            self.user,
+            'Students'
         ))

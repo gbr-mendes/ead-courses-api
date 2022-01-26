@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
+
 from university import models
 
 from accounts.serializers import UserSerializer
@@ -174,3 +175,10 @@ class StudentSerializer(serializers.ModelSerializer):
         ).update(**validated_data)
 
         return instance
+
+
+class SubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Subject
+        fields = ('id', 'name')
+        extra_kwargs = {'id': {'read_only': True}}

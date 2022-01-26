@@ -1,13 +1,14 @@
-from rest_framework import generics
+from rest_framework import generics, exceptions
 
 from university.serializers import (
                                         EmployeeSerializer,
                                         StudentSerializer,
+                                        SubjectSerializer,
                                         TeacherSerializer,
                                         CourseSerializer,
                                         LessonSerializer
                                     )
-from university.permissions import SchoolAdministrators, Teachers
+from university.permissions import SchoolAdministrators, Teachers, Students
 from university import models
 
 
@@ -82,3 +83,27 @@ class CreateLessonAPIView(generics.CreateAPIView):
     """Create a new lesson on the system"""
     serializer_class = LessonSerializer
     permission_classes = (Teachers,)
+
+
+class WatchCourseAPIView(generics.RetrieveAPIView):
+    """Restrive a course to a student"""
+    serializer_class = CourseSerializer
+    permission_classes = (Students,)
+    queryset = models.Course.objects.all()
+
+    def get_object(self):
+        queryset = super().get_object()
+        user = self.request.user
+        student = models.Student.objects.get(user=user)
+        if student.course != queryset:
+            raise exceptions.PermissionDenied(
+                'The student can only access the course in which he is enrolled',
+                )
+
+        return queryset
+
+
+class CreateSubjectAPIView(generics.ListCreateAPIView):
+    serializer_class = SubjectSerializer
+    permission_classes = (SchoolAdministrators,)
+    queryset = models.Subject.objects.all()

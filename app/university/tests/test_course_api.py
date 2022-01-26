@@ -134,3 +134,44 @@ class PrivateCourseAPITest(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         course.refresh_from_db()
         self.assertEqual(course.name, course_payload['name'])
+
+
+class WatchCourseAPITest(TestCase):
+    """Tests fo requests to wtach course endpoint"""
+    def setUp(self):
+        self.client = APIClient()
+        self.user = HelperTest.create_user(
+            name='Student Name',
+            email='student@email.com',
+            password='password'
+        )
+        self.student = models.Student.objects.create(
+            user=self.user,
+            course=models.Course.objects.create(
+                name='Test Course'
+            )
+        )
+        self.client.force_authenticate(self.user)
+
+    def test_watch_course_success(self):
+        """Test student watch course success"""
+        course = self.student.course
+        COURSE_URL = reverse(
+            'university:watch_course',
+            kwargs={'pk': course.id}
+        )
+        res = self.client.get(COURSE_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data['id'], str(course.id))
+
+    def test_watch_course_forbiden(self):
+        """Test watch a course for a not allowed student"""
+        new_course = models.Course.objects.create(
+            name='New Course'
+        )
+        COURSE_URL = reverse(
+            'university:watch_course',
+            kwargs={'pk': new_course.id}
+        )
+        res = self.client.get(COURSE_URL)
+        self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
