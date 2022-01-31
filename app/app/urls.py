@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from university import views
 
 urlpatterns = [
     # Django urls
@@ -23,6 +23,7 @@ urlpatterns = [
     # Third party urls
     path('api-auth/', include('rest_framework.urls')),
     # API URL's
+    path('', views.ExibitionView.as_view(), name='home_message'),# apresatation of project
     path('api/accounts/', include('accounts.urls')),
     path('api/university/', include('university.urls')),
 ]

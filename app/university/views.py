@@ -1,4 +1,7 @@
 from rest_framework import generics, exceptions
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from university.serializers import (
                                         EmployeeSerializer,
@@ -10,6 +13,35 @@ from university.serializers import (
                                     )
 from university.permissions import SchoolAdministrators, Teachers, Students
 from university import models
+
+
+class ExibitionView(APIView):
+    permission_classes = (AllowAny,)
+    def get(self, request):
+        info = {
+            "project_name": "ead-courses-api",
+            "author": "Gabriel Mendes",
+            "description": "API for a fictional ead plataform.You can learn more on th readme on github.You will find all th routes over there",
+            "repo": "https://github.com/gbr-mendes/ead-courses-api",
+            "users": {
+                "employee": {
+                    "email": "nelsondanilosamuelpeixoto_@dlh.de",
+                    "password": "password"
+                },
+                "teacher":{
+                    "email": "valentinanairelzasilveira-98@babo.adv.br",
+                    "password": "password"
+                },
+                "student":{
+                    "email": "eelianebrendaalves@ssala.com.br",
+                    "password": "password"
+                }
+
+            },
+            "ATENTION": "The system uses token authentication. You can generate the token at https://ead-courses-api.herokuapp.com/api/accounts/token/ . I suggest you use an extesion for you browser like modheader to pass the token on your requests"
+        }
+        return Response(info)
+
 
 
 class CreateListEmployeeAPIView(generics.ListCreateAPIView):
