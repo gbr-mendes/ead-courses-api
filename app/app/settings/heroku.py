@@ -14,6 +14,6 @@ DATABASES = {
     "default": env.db(),
 }
 
-CLOUDINARY_STORAGE = env.dict('CLOUDINARY_STORAGE')
+# CLOUDINARY_STORAGE = env.dict('CLOUDINARY_STORAGE')
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
