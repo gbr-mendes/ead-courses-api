@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from university import views
 
 
 urlpatterns = [
@@ -25,6 +26,7 @@ urlpatterns = [
     # Third party urls
     path('api-auth/', include('rest_framework.urls')),
     # API URL's
+    path('', views.ExibitionView.as_view(), name='home_message'),# apresatation of project
     path('api/accounts/', include('accounts.urls')),
     path('api/university/', include('university.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
